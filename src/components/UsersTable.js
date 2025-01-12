@@ -1,4 +1,3 @@
-// src/components/UsersTable.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -26,6 +25,7 @@ const UsersTable = () => {
   const handleEdit = (user) => {
     setIsEditing(true);
     setCurrentUser(user);
+    setIsFormOpen(false); // Ensure add form is closed
   };
 
   // Handle delete button click
@@ -41,11 +41,9 @@ const UsersTable = () => {
   // Handle update of user
   const handleUpdate = async (e) => {
     e.preventDefault();
-    const updatedUser = { ...currentUser };
-
     try {
-      await axios.put(`https://jsonplaceholder.typicode.com/users/${updatedUser.id}`, updatedUser);
-      setUsers(users.map((user) => (user.id === updatedUser.id ? updatedUser : user)));
+      await axios.put(`https://jsonplaceholder.typicode.com/users/${currentUser.id}`, currentUser);
+      setUsers(users.map((user) => (user.id === currentUser.id ? currentUser : user)));
       setIsEditing(false);
       setCurrentUser(null);
     } catch (error) {
@@ -69,7 +67,7 @@ const UsersTable = () => {
   // Handle input change for editing and adding user
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (isEditing && currentUser) {
+    if (isEditing) {
       setCurrentUser((prevState) => ({ ...prevState, [name]: value }));
     } else {
       setNewUser((prevState) => ({ ...prevState, [name]: value }));
@@ -80,15 +78,15 @@ const UsersTable = () => {
     <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
       <h3 className="text-xl font-semibold text-gray-800 mb-4">Users Table</h3>
 
-      {/* Add User Form */}
-      {isFormOpen && (
+      {/* Add or Edit User Form */}
+      {(isFormOpen || isEditing) && (
         <div className="bg-white p-6 rounded-lg shadow-md mb-4">
-          <h4 className="text-lg font-medium text-gray-800">Add New User</h4>
-          <form onSubmit={handleAddUser} className="space-y-4">
+          <h4 className="text-lg font-medium text-gray-800">{isEditing ? 'Edit User' : 'Add New User'}</h4>
+          <form onSubmit={isEditing ? handleUpdate : handleAddUser} className="space-y-4">
             <input
               type="text"
               name="name"
-              value={newUser.name}
+              value={isEditing ? currentUser.name : newUser.name}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md"
               placeholder="User Name"
@@ -96,18 +94,22 @@ const UsersTable = () => {
             <input
               type="email"
               name="email"
-              value={newUser.email}
+              value={isEditing ? currentUser.email : newUser.email}
               onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded-md"
               placeholder="Email"
             />
             <button type="submit" className="bg-blue-600 text-white py-2 px-4 rounded-md">
-              Add User
+              {isEditing ? 'Update User' : 'Add User'}
             </button>
             <button
               type="button"
               className="ml-4 bg-gray-500 text-white py-2 px-4 rounded-md"
-              onClick={() => setIsFormOpen(false)}
+              onClick={() => {
+                setIsFormOpen(false);
+                setIsEditing(false);
+                setCurrentUser(null);
+              }}
             >
               Cancel
             </button>
@@ -115,16 +117,17 @@ const UsersTable = () => {
         </div>
       )}
 
-      {/* Plus Icon to open the form */}
-      <div className="flex justify-end mb-4">
-      <button
-  onClick={() => setIsFormOpen(true)}
-  className="bg-gradient-to-r from-green-400 to-teal-500 text-white w-16 pb-2 rounded-full shadow-lg hover:scale-110 transform transition duration-300 ease-in-out focus:outline-none flex items-center justify-center"
->
-  <span className="text-3xl font-bold">+</span>
-</button>
-
-      </div>
+      {/* Plus Icon to open the Add User form */}
+      {!isEditing && !isFormOpen && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="bg-gradient-to-r from-green-400 to-teal-500 text-white w-16 pb-2 rounded-full shadow-lg hover:scale-110 transform transition duration-300 ease-in-out focus:outline-none flex items-center justify-center"
+          >
+            <span className="text-3xl font-bold">+</span>
+          </button>
+        </div>
+      )}
 
       <table className="min-w-full table-auto">
         <thead>

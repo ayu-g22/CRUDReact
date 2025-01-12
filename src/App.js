@@ -1,25 +1,20 @@
-import React from "react";
-import UsersTable from "./components/UsersTable";
-import Chart from "./components/Chart";
-import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
+import React from 'react';
+import UsersTable from './components/UsersTable';
+import BarChart from './components/BarChart';
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 
 const App = () => {
   return (
-    <div className="h-screen flex flex-col">
+    <div className="container mx-auto p-6">
       <Navbar />
-      <div className="flex flex-1">
+      <div className="flex space-x-6">
         <Sidebar />
-        <div className="flex flex-1 p-6 space-x-6">
-          {/* Users Table */}
-          <div className="w-1/2 p-2">
-            <UsersTable />
-          </div>
-          
-          {/* Chart */}
-          <div className="w-1/2">
-            <Chart />
-          </div>
+        <div className="w-1/2 p-2">
+          <UsersTable />
+        </div>
+        <div className="w-1/2">
+          <BarChart />
         </div>
       </div>
     </div>

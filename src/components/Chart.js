@@ -1,40 +1,50 @@
-// src/components/Dashboard.js
 import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-import 'chart.js/auto';
-import UsersTable from './UsersTable';
 
-// Chart.js setup
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-const Dashboard = () => {
-  const [chartData, setChartData] = useState({
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-    datasets: [
-      {
-        label: 'User Activity',
-        data: [30, 50, 70, 90, 120],
-        borderColor: '#4F46E5',
-        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-        fill: true,
-        tension: 0.3,
-      },
-    ],
-  });
+const Chart = () => {
+  const [chartData, setChartData] = useState({});
 
   useEffect(() => {
-    // Fetch user data and update chartData or other state as needed
+    fetchChartData();
   }, []);
 
+  const fetchChartData = async () => {
+    try {
+      const response = await fetch('https://disease.sh/v3/covid-19/historical/all?lastdays=30');
+      const data = await response.json();
+
+      // Extract the dates and cases from the API response
+      const dates = Object.keys(data.cases);
+      const cases = Object.values(data.cases);
+
+      // Prepare the chart data
+      setChartData({
+        labels: dates,
+        datasets: [
+          {
+            label: 'Daily New Cases',
+            data: cases,
+            fill: false,
+            backgroundColor: 'rgba(75,192,192,0.2)',
+            borderColor: 'rgba(75,192,192,1)',
+          },
+        ],
+      });
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+    }
+  };
+
   return (
-    <div className="flex-1 p-6 space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-medium text-gray-800 mb-4">User Activity Chart</h3>
+    <div>
+      <h2 className='text-xl font-bold mb-4'>COVID-19 Daily New Cases</h2>
+      {chartData.labels ? (
         <Line data={chartData} />
-      </div>
+      ) : (
+        <p>Loading chart...</p>
+      )}
     </div>
   );
 };
 
-export default Dashboard;
+export default Chart;
